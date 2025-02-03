@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Financial Analyzer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Modern CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            transition: background 0.3s ease;
+        }
+
+        body.light-mode {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+
+        /* Header Styles */
+        
+        header {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.15));
+            backdrop-filter: blur(15px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Logo Styling */
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #4a9eff;
+            text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.1);
+            transition: color 0.3s ease;
+        }
+
+        .logo:hover {
+            color: #6ab1ff;
+        }
+
+        /* Enhanced Theme Toggle */
+        .theme-toggle {
+            position: absolute;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-toggle i {
+            font-size: 1.5rem;
+            color: #4a9eff;
+            transition: color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.2);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.9);
+        }
+
+        .theme-toggle i:hover {
+            color: #6ab1ff;
+        }
+        /* Footer Styles */
+        footer {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(15px);
+            padding: 2rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            margin-top: 2rem;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 10%, transparent 10.01%);
+            background-size: 20px 20px;
+            transform: rotate(45deg);
+            pointer-events: none;
+            animation: animateBackground 10s linear infinite;
+        }
+
+        @keyframes animateBackground {
+            0% {
+                transform: rotate(45deg) translateY(0);
+            }
+            100% {
+                transform: rotate(45deg) translateY(20px);
+            }
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        footer .social-links {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        footer .social-links a {
+            color: #fff;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            transform: translateY(0);
+        }
+
+        footer .social-links a:hover {
+            color: #4a9eff;
+            transform: translateY(-5px);
+        }
+
+        footer .social-links a i {
+            transition: transform 0.3s ease;
+        }
+
+        footer .social-links a:hover i {
+            transform: scale(1.2);
+        }
+
+        footer .footer-links {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        footer .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        footer .footer-links a:hover {
+            color: #4a9eff;
+        }
+
+        body.light-mode footer {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95));
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode footer p {
+            color: rgba(0, 0, 0, 0.8);
+        }
+
+        body.light-mode footer .social-links a {
+            color: #333;
+        }
+
+        body.light-mode footer .footer-links a {
+            color: rgba(0, 0, 0, 0.8);
+        }
+
+        body.light-mode footer .footer-links a:hover {
+            color: #4a9eff;
+        }
+
+        /* Main Dashboard Layout */
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+
+        /* Input Card Styling */
+        .input-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #7f8fa4;
+            font-size: 0.9rem;
+        }
+
+        body.light-mode .input-label {
+            color: #666;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .input-field {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+        }
+
+        /* Custom Slider Styling */
+        .slider-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        body.light-mode .slider-container {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .custom-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        body.light-mode .custom-slider {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4a9eff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        /* Chart Container Styling */
+        .chart-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 1rem;
+            height: 400px;
+        }
+
+        body.light-mode .chart-container {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 600px;
+            }
+        }
+
+        /* Button Styling */
+        .calculate-btn {
+            background: linear-gradient(135deg, #4a9eff 0%, #2d6cdf 100%);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Results Display Styling */
+        .results {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            display: none;
+        }
+
+        body.light-mode .results {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Portfolio Optimization Section */
+
+        .portfolio-optimization {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.15));
+            border-radius: 20px;
+            padding: 1.5rem;
+            backdrop-filter: blur(20px);
+            margin-top: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .portfolio-optimization:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Asset Allocation */
+        .asset-allocation {
+            display: grid;
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Asset Control */
+        .asset-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .asset-control:hover {
+            background: rgba(74, 158, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        /* Allocation Slider */
+        .allocation-slider {
+            flex-grow: 1;
+        }
+
+        /* Efficient Frontier Chart */
+        .efficient-frontier-chart {
+            height: 400px;
+            margin-top: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .efficient-frontier-chart:hover {
+            transform: scale(1.02);
+        }
+
+        /* Download Controls */
+        .download-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Download Button */
+        .download-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* PDF Button */
+        .pdf-btn {
+            background: linear-gradient(135deg, #4a9eff, #2d6cdf);
+            color: white;
+        }
+
+        /* Image Button */
+        .image-btn {
+            background: linear-gradient(135deg, #00c853, #009624);
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">QuantumFinance Pro Fv</div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-moon"></i>
+        </button>
+    </header>
+
+    <div class="dashboard">
+        <!-- Input Section -->
+        <div class="input-card">
+            <h2>Future Pricing Parameters</h2>
+            <div class="input-group">
+                <label class="input-label">Current Asset Price ($)</label>
+                <input type="number" id="currentPrice" class="input-field" placeholder="Enter current price" step="0.01">
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">Time Horizon (Years)</label>
+                <input type="number" id="timeHorizon" class="input-field" placeholder="Enter years" min="1" max="50">
+            </div>
+
+            <div class="slider-container">
+                <label class="input-label">Expected Annual Growth Rate: <span id="growthRateValue">5</span>%</label>
+                <input type="range" id="growthRate" class="custom-slider" min="0" max="30" value="5">
+            </div>
+
+            <div class="slider-container">
+                <label class="input-label">Volatility (σ): <span id="volatilityValue">15</span>%</label>
+                <input type="range" id="volatility" class="custom-slider" min="5" max="50" value="15">
+            </div>
+
+            <button class="calculate-btn" onclick="calculateFuturePrice()">Calculate Future Price</button>
+
+            <!-- Results Display -->
+            <div class="results" id="results">
+                <h3>Projection Results</h3>
+                <p>Expected Future Price: $<span id="futurePrice">0.00</span></p>
+                <p>95% Confidence Interval: $<span id="confidenceInterval">0.00</span> - $<span id="confidenceIntervalHigh">0.00</span></p>
+                <p>Value at Risk (95%): $<span id="var">0.00</span></p>
+                <p>Sharpe Ratio: <span id="sharpeRatio">0.00</span></p>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="chart-container">
+            <canvas id="financialChart"></canvas>
+        </div>
+
+        <!-- Portfolio Optimization Section -->
+        <div class="portfolio-optimization">
+            <h2>Portfolio Optimizer</h2>
+            <div class="asset-allocation" id="assetControls">
+                <!-- Dynamic asset controls will be added here -->
+            </div>
+            <button class="calculate-btn" onclick="optimizePortfolio()">
+                <i class="fas fa-brain"></i> Quantum Optimize
+            </button>
+            <div class="efficient-frontier-chart">
+                <canvas id="frontierChart"></canvas>
+            </div>
+            <div class="download-controls">
+                <button class="download-btn pdf-btn" onclick="generatePDF()">
+                    <i class="fas fa-file-pdf"></i> Save PDF
+                </button>
+                <button class="download-btn image-btn" onclick="saveAsImage()">
+                    <i class="fas fa-image"></i> Save Image
+                </button>
+            </div>
+        </div>
+    </div>
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 Quantum Financial Analyzer. All rights reserved Sourav Dey Soptom.</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+            </div>
+        </footer>
+
+    <script>
+        // Initialize Chart.js instances
+        let financialChart = null;
+        let frontierChart = null;
+
+        // DOM Elements
+        const growthRateSlider = document.getElementById('growthRate');
+        const volatilitySlider = document.getElementById('volatility');
+        const growthRateValue = document.getElementById('growthRateValue');
+        const volatilityValue = document.getElementById('volatilityValue');
+
+        // Real-time slider updates
+        growthRateSlider.addEventListener('input', updateGrowthRate);
+        volatilitySlider.addEventListener('input', updateVolatility);
+
+        function updateGrowthRate() {
+            growthRateValue.textContent = this.value;
+        }
+
+        function updateVolatility() {
+            volatilityValue.textContent = this.value;
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const icon = document.querySelector('.theme-toggle i');
+            if (document.body.classList.contains('light-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+
+        // Main Calculation Function
+        function calculateFuturePrice() {
+            // Get input values
+            const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+            const years = parseInt(document.getElementById('timeHorizon').value);
+            const growthRate = parseFloat(growthRateSlider.value) / 100;
+            const volatility = parseFloat(volatilitySlider.value) / 100;
+
+            // Input validation
+            if (!currentPrice || !years) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            // Financial model calculations
+            const mean = growthRate - (0.5 * volatility ** 2);
+            const expectedPrice = currentPrice * Math.exp(mean * years);
+            const stdDev = volatility * Math.sqrt(years);
+            
+            // Confidence interval calculation (95% Z-score = 1.96)
+            const lowerBound = expectedPrice * Math.exp(-1.96 * stdDev);
+            const upperBound = expectedPrice * Math.exp(1.96 * stdDev);
+
+            // Value at Risk (VaR) and Sharpe Ratio
+            const varValue = expectedPrice - lowerBound;
+            const sharpeRatio = (growthRate - 0.02) / volatility; // Assuming risk-free rate of 2%
+
+            // Update results display
+            document.getElementById('futurePrice').textContent = expectedPrice.toFixed(2);
+            document.getElementById('confidenceInterval').textContent = lowerBound.toFixed(2);
+            document.getElementById('confidenceIntervalHigh').textContent = upperBound.toFixed(2);
+            document.getElementById('var').textContent = varValue.toFixed(2);
+            document.getElementById('sharpeRatio').textContent = sharpeRatio.toFixed(2);
+            document.getElementById('results').style.display = 'block';
+
+            // Generate projection data for chart
+            const projectionData = generateProjectionData(currentPrice, growthRate, volatility, years);
+            
+            // Update or create chart
+            updateChart(projectionData, years);
+        }
+
+        // Generate yearly projection data
+        function generateProjectionData(currentPrice, growthRate, volatility, years) {
+            const data = [];
+            for (let i = 0; i <= years; i++) {
+                const mean = (growthRate - 0.5 * volatility ** 2) * i;
+                const stdDev = volatility * Math.sqrt(i);
+                data.push({
+                    year: i,
+                    expected: currentPrice * Math.exp(mean),
+                    lower: currentPrice * Math.exp(mean - 1.96 * stdDev),
+                    upper: currentPrice * Math.exp(mean + 1.96 * stdDev)
+                });
+            }
+            return data;
+        }
+
+        // Chart Update/Creation Function
+        function updateChart(data, years) {
+            const ctx = document.getElementById('financialChart').getContext('2d');
+            
+            // Destroy existing chart instance
+            if (financialChart) {
+                financialChart.destroy();
+            }
+
+            // Create new chart
+            financialChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: years + 1}, (_, i) => `Year ${i}`),
+                    datasets: [{
+                        label: 'Expected Price',
+                        data: data.map(d => d.expected),
+                        borderColor: '#4a9eff',
+                        backgroundColor: 'rgba(74, 158, 255, 0.2)',
+                        fill: false,
+                        tension: 0.3
+                    }, {
+                        label: '95% Confidence Range',
+                        data: data.map(d => d.upper),
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        fill: '-1',
+                        tension: 0.3,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        label += '$' + context.parsed.y.toFixed(2);
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'xy',
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Portfolio Optimization Functions
+        const assets = [
+            { name: "Stocks", return: 0.08, volatility: 0.15 },
+            { name: "Bonds", return: 0.04, volatility: 0.06 },
+            { name: "Crypto", return: 0.12, volatility: 0.30 },
+            { name: "REITs", return: 0.06, volatility: 0.10 }
+        ];
+
+        function initializeAssetControls() {
+            const container = document.getElementById('assetControls');
+            assets.forEach((asset, index) => {
+                const div = document.createElement('div');
+                div.className = 'asset-control';
+                div.innerHTML = `
+                    <span>${asset.name}</span>
+                    <input type="range" class="allocation-slider" 
+                           min="0" max="100" value="${index === 0 ? 100 : 0}"
+                           data-index="${index}"
+                           oninput="updateAllocation(this)">
+                    <span class="allocation-value">${index === 0 ? 100 : 0}%</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateAllocation(slider) {
+            const index = parseInt(slider.dataset.index);
+            const value = parseInt(slider.value);
+            slider.parentNode.querySelector('.allocation-value').textContent = `${value}%`;
+            optimizePortfolio();
+        }
+
+        function optimizePortfolio() {
+            const allocations = Array.from(document.querySelectorAll('.allocation-slider'))
+                .map(slider => parseInt(slider.value) / 100);
+            updateFrontierChart(allocations);
+        }
+
+        function updateFrontierChart(allocations) {
+            const ctx = document.getElementById('frontierChart').getContext('2d');
+            if (frontierChart) frontierChart.destroy();
+
+            frontierChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Efficient Frontier',
+                        data: calculateFrontierPoints(allocations),
+                        backgroundColor: '#4a9eff',
+                        borderColor: '#2d6cdf',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: 'Risk (Volatility)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Return' }
+                        }
+                    },
+                    plugins: {
+                        zoom: {
+                            zoom: { wheel: { enabled: true }, mode: 'xy' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function calculateFrontierPoints(allocations) {
+            return Array.from({length: 20}, (_, i) => ({
+                x: Math.random() * 0.2 + 0.05,
+                y: Math.random() * 0.15 + 0.03
+            }));
+        }
+
+        // Report Generation Functions
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Quantum Financial Report", 20, 20);
+            doc.save('financial-report.pdf');
+        }
+
+        function saveAsImage() {
+            const chartCanvas = document.getElementById('financialChart');
+            const image = chartCanvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'financial-chart.png';
+            link.href = image;
+            link.click();
+        }
+
+        // Initialize
+        window.onload = function() {
+            initializeAssetControls();
+            optimizePortfolio();
+            document.getElementById('currentPrice').value = 100;
+            document.getElementById('timeHorizon').value = 10;
+            calculateFuturePrice();
+        };
+    </script>
+</body>
+</html>
